@@ -77,6 +77,7 @@ export default function App() {
     setHistory((prev) => [newHistoryItem, ...prev]);
   };
 
+  // Inverte as moedas de origem e destino (Swap)
   const handleSwap = () => {
     setFromCurrency(toCurrency);
     setToCurrency(fromCurrency);
