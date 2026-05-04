@@ -1,50 +1,37 @@
-# Welcome to your Expo app 👋
+# 💱 Conversor de Moedas App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Um aplicativo mobile moderno desenvolvido com **React Native** e **Expo**, focado na conversão de moedas de forma manual e offline, utilizando taxas de câmbio fixas. Ideal para demonstrar manipulação de estados, estruturação de interface e lógica de negócios no front-end.
 
-## Get started
+## ✨ Funcionalidades
 
-1. Install dependencies
+- 💰 **Conversão Multimoedas:** Cálculo instantâneo entre Real (BRL), Dólar (USD), Euro (EUR) e Libra (GBP).
+- 🔄 **Swap Rápido:** Botão dedicado para inverter rapidamente a moeda de origem e a de destino.
+- 📜 **Histórico de Conversões:** Registro em lista das últimas operações realizadas pelo usuário.
+- 🧹 **Reset Completo:** Limpeza instantânea de todos os inputs, resultados e histórico.
+- 📱 **Interface Moderna:** UI limpa e responsiva utilizando os componentes nativos.
 
-   ```bash
-   npm install
-   ```
+## 🚀 Tecnologias Utilizadas
 
-2. Start the app
+- [React Native](https://reactnative.dev/) - Framework principal
+- [Expo CLI](https://expo.dev/) - Setup e gerenciamento do ambiente
+- [@react-native-picker/picker](https://github.com/react-native-picker/picker) - Componente de seleção
+- **JavaScript (ES6+)** - Lógica e manipulação matemática
 
-   ```bash
-   npx expo start
-   ```
+## 🛠️ Como executar o projeto localmente
 
-In the output, you'll find options to open the app in a
+1. Clone este repositório:
+    git clone https://github.com/kaua-hiro/conversor_moedas.git
+2. Acesse a pasta do projeto:
+    cd ConversorMoedas
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+3. Instale as dependências:
+    npm install
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+4. Inicie o servidor do Expo:
+    npx expo start
 
-## Get a fresh project
+5. Escaneie o QR Code com o aplicativo **Expo Go** no seu celular ou aperte a tecla `a` no terminal para abrir no emulador Android.
 
-When you're ready, run:
+## 👨‍💻 Autor
 
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Desenvolvido por **Kauã Hiro Mizumoto**.
