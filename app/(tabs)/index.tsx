@@ -1,98 +1,350 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Picker } from "@react-native-picker/picker";
+import React, { useState } from "react";
+import {
+  Alert,
+  FlatList,
+  Image,
+  Keyboard,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+// Taxas fixas baseadas no Dólar (USD) para facilitar a matemática cruzada
+const RATES = {
+  USD: 1,
+  BRL: 5.15,
+  EUR: 0.92,
+  GBP: 0.79,
+};
 
-export default function HomeScreen() {
+// Imagens das bandeiras (mock via URL para facilitar)
+const FLAGS = {
+  BRL: "https://flagcdn.com/w80/br.png",
+  USD: "https://flagcdn.com/w80/us.png",
+  EUR: "https://flagcdn.com/w80/eu.png",
+  GBP: "https://flagcdn.com/w80/gb.png",
+};
+
+export default function App() {
+  const [inputValue, setInputValue] = useState("");
+  const [fromCurrency, setFromCurrency] = useState("BRL");
+  const [toCurrency, setToCurrency] = useState("USD");
+  const [result, setResult] = useState(null);
+  const [history, setHistory] = useState([]);
+
+  // Função para formatar a moeda
+  const formatCurrency = (value, currency) => {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: currency,
+    }).format(value);
+  };
+
+  const handleConvert = () => {
+    Keyboard.dismiss();
+
+    if (!inputValue || isNaN(inputValue)) {
+      Alert.alert("Erro", "Por favor, digite um valor numérico válido.");
+      return;
+    }
+
+    if (fromCurrency === toCurrency) {
+      Alert.alert("Aviso", "Selecione moedas diferentes para converter.");
+      return;
+    }
+
+    const amount = parseFloat(inputValue.replace(",", "."));
+
+    // Matemática: Converte o valor de origem para USD, e depois de USD para o destino
+    const amountInUSD = amount / RATES[fromCurrency];
+    const finalAmount = amountInUSD * RATES[toCurrency];
+
+    const formattedInput = formatCurrency(amount, fromCurrency);
+    const formattedResult = formatCurrency(finalAmount, toCurrency);
+
+    setResult(formattedResult);
+
+    // Salva no histórico (adicionando no topo da lista)
+    const newHistoryItem = {
+      id: Math.random().toString(),
+      text: `${formattedInput} ➔ ${formattedResult}`,
+    };
+    setHistory((prev) => [newHistoryItem, ...prev]);
+  };
+
+  const handleSwap = () => {
+    setFromCurrency(toCurrency);
+    setToCurrency(fromCurrency);
+    setResult(null);
+  };
+
+  const handleReset = () => {
+    setInputValue("");
+    setResult(null);
+    Keyboard.dismiss();
+  };
+
+  const clearHistory = () => {
+    setHistory([]);
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.headerTitle}>Conversor de Moedas</Text>
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      <View style={styles.card}>
+        <TextInput
+          style={styles.input}
+          placeholder="Digite o valor..."
+          keyboardType="numeric"
+          value={inputValue}
+          onChangeText={setInputValue}
+        />
+
+        <View style={styles.selectorsContainer}>
+          {/* Origem */}
+          <View style={styles.pickerWrapper}>
+            <Image source={{ uri: FLAGS[fromCurrency] }} style={styles.flag} />
+            <Picker
+              selectedValue={fromCurrency}
+              style={styles.picker}
+              onValueChange={(itemValue) => setFromCurrency(itemValue)}
+            >
+              <Picker.Item label="BRL" value="BRL" />
+              <Picker.Item label="USD" value="USD" />
+              <Picker.Item label="EUR" value="EUR" />
+              <Picker.Item label="GBP" value="GBP" />
+            </Picker>
+          </View>
+
+          {/* Botão de Swap */}
+          <TouchableOpacity onPress={handleSwap} style={styles.swapButton}>
+            <Text style={styles.swapButtonText}>⇄</Text>
+          </TouchableOpacity>
+
+          {/* Destino */}
+          <View style={styles.pickerWrapper}>
+            <Image source={{ uri: FLAGS[toCurrency] }} style={styles.flag} />
+            <Picker
+              selectedValue={toCurrency}
+              style={styles.picker}
+              onValueChange={(itemValue) => setToCurrency(itemValue)}
+            >
+              <Picker.Item label="BRL" value="BRL" />
+              <Picker.Item label="USD" value="USD" />
+              <Picker.Item label="EUR" value="EUR" />
+              <Picker.Item label="GBP" value="GBP" />
+            </Picker>
+          </View>
+        </View>
+
+        <View style={styles.actionButtons}>
+          <TouchableOpacity
+            style={[styles.button, styles.resetBtn]}
+            onPress={handleReset}
+          >
+            <Text style={styles.buttonText}>Limpar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, styles.convertBtn]}
+            onPress={handleConvert}
+          >
+            <Text style={styles.buttonText}>Converter</Text>
+          </TouchableOpacity>
+        </View>
+
+        {result && (
+          <View style={styles.resultContainer}>
+            <Text style={styles.resultLabel}>Valor Convertido:</Text>
+            <Text style={styles.resultValue}>{result}</Text>
+          </View>
+        )}
+      </View>
+
+      <View style={styles.historyContainer}>
+        <View style={styles.historyHeader}>
+          <Text style={styles.historyTitle}>Últimas Conversões</Text>
+          {history.length > 0 && (
+            <TouchableOpacity onPress={clearHistory}>
+              <Text style={styles.clearText}>Apagar</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        <FlatList
+          data={history}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={styles.historyItem}>
+              <Text style={styles.historyItemText}>{item.text}</Text>
+            </View>
+          )}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>Nenhuma conversão recente.</Text>
+          }
+        />
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: "#F5F7FA",
+    padding: 20,
+    paddingTop: 50,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  headerTitle: {
+    fontSize: 26,
+    fontWeight: "bold",
+    color: "#2D3748",
+    textAlign: "center",
+    marginBottom: 20,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 3,
+    marginBottom: 20,
+  },
+  input: {
+    backgroundColor: "#EDF2F7",
+    borderRadius: 10,
+    padding: 15,
+    fontSize: 18,
+    color: "#2D3748",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  selectorsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  pickerWrapper: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#EDF2F7",
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    height: 50,
+  },
+  picker: {
+    flex: 1,
+    height: 50,
+  },
+  flag: {
+    width: 24,
+    height: 16,
+    marginRight: 5,
+    borderRadius: 2,
+  },
+  swapButton: {
+    backgroundColor: "#4A5568",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 10,
+  },
+  swapButtonText: {
+    color: "#FFF",
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  actionButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  button: {
+    flex: 1,
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  resetBtn: {
+    backgroundColor: "#E2E8F0",
+    marginRight: 10,
+  },
+  convertBtn: {
+    backgroundColor: "#3182CE",
+    marginLeft: 10,
+  },
+  buttonText: {
+    fontWeight: "bold",
+    fontSize: 16,
+    color: "#2D3748",
+  },
+  resultContainer: {
+    marginTop: 25,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: "#E2E8F0",
+    alignItems: "center",
+  },
+  resultLabel: {
+    fontSize: 14,
+    color: "#718096",
+    marginBottom: 5,
+  },
+  resultValue: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#38A169",
+  },
+  historyContainer: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  historyHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  historyTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#2D3748",
+  },
+  clearText: {
+    color: "#E53E3E",
+    fontWeight: "bold",
+  },
+  historyItem: {
+    backgroundColor: "#EDF2F7",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  historyItemText: {
+    fontSize: 16,
+    color: "#4A5568",
+    textAlign: "center",
+  },
+  emptyText: {
+    textAlign: "center",
+    color: "#A0AEC0",
+    marginTop: 20,
   },
 });
