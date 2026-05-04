@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { 
   StyleSheet, Text, View, TextInput, TouchableOpacity, 
-  Image, FlatList, SafeAreaView, StatusBar 
+  Image, FlatList, SafeAreaView, StatusBar, Platform 
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { Feather } from '@expo/vector-icons';
@@ -22,6 +22,20 @@ export default function App() {
     handleReset,
     clearHistory
   } = useCurrencyConverter();
+
+  // FIX PARA GITHUB PAGES: Injeta a fonte dos ícones direto de um CDN quando roda na Web
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      const style = document.createElement('style');
+      style.textContent = `
+        @font-face {
+          font-family: 'Feather';
+          src: url('https://unpkg.com/@expo/vector-icons@14.0.2/build/vendor/react-native-vector-icons/Fonts/Feather.ttf') format('truetype');
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }, []);
 
   return (
     <LinearGradient colors={['#0B0F19', '#1A233A']} style={styles.container}>
@@ -47,7 +61,6 @@ export default function App() {
           </View>
 
           <View style={styles.selectorsContainer}>
-            {/* Origem com Picker Nativo Restabelecido */}
             <View style={styles.pickerWrapper}>
               <Image source={{ uri: FLAGS[fromCurrency as keyof typeof FLAGS] }} style={styles.flag} />
               <Picker
@@ -67,7 +80,6 @@ export default function App() {
               <Feather name="refresh-cw" size={20} color="#00E5FF" />
             </TouchableOpacity>
 
-            {/* Destino com Picker Nativo Restabelecido */}
             <View style={styles.pickerWrapper}>
               <Image source={{ uri: FLAGS[toCurrency as keyof typeof FLAGS] }} style={styles.flag} />
               <Picker
@@ -153,7 +165,6 @@ const styles = StyleSheet.create({
   selectorsContainer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 25 },
   
   pickerWrapper: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(15, 23, 42, 0.6)', borderRadius: 16, paddingHorizontal: 10, borderWidth: 1, borderColor: '#334155', height: 55 },
-  // O Picker com os atributos corretos para ficar escuro e sem bordas nativas
   picker: { flex: 1, color: '#FFFFFF', height: 55, backgroundColor: '#0F172A', borderWidth: 0, outlineStyle: 'none' as any },
   
   flag: { width: 28, height: 20, marginRight: 5, borderRadius: 4 },
