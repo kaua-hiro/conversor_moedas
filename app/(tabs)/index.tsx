@@ -44,6 +44,7 @@ export default function App() {
     }).format(value);
   };
 
+  // Lógica principal de conversão e formatação matemática
   const handleConvert = () => {
     Keyboard.dismiss();
 
